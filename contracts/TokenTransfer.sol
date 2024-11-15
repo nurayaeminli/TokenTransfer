@@ -1,25 +1,38 @@
 // SPDX-License-Identifier: MIT
-pragma solidity ^0.8.0;
+pragma solidity ^0.8.25;
 
-import 'https://github.com/OpenZeppelin/openzeppelin-contracts/blob/master/contracts/token/ERC20/ERC20.sol';
-
-contract TransferToken {
-    function Transfer(uint amount) external {
-       IERC20 token = IERC20(0xb7797693B4D02B8eB6fDCF65f65aB9e89bf673C8);
-        token.transfer(msg.sender, amount);
-    }
-
-    function transferfrom(address recipient, uint amount) external {
-        IERC20 token = IERC20(0xb7797693B4D02B8eB6fDCF65f65aB9e89bf673C8);
-        token.transferFrom(msg.sender, recipient, amount);
-    }
+interface IERC20 {
+    function transfer(address _to, uint _amount) external returns(bool);
+    function balanceOf(address _account) external returns (uint);
+    function allowance(address _owner, address _spender) external returns (uint);
+    function transferFrom(address _from, address _to, uint _amount) external returns(bool);
 }
 
-contract Owner {
-    function Transfer(address recipient, uint amount) external {
-       IERC20 token = IERC20(0xb7797693B4D02B8eB6fDCF65f65aB9e89bf673C8);
-        token.approve(0x599Ea0fFd42D953b7207b5d927589c05d69243D8, amount);
-        TransferToken transferToken = TransferToken(0x599Ea0fFd42D953b7207b5d927589c05d69243D8);
-        transferToken.transferfrom(recipient, amount);
+contract Task1 {
+
+    mapping(address => uint) tokenBalance;
+
+    event DirectSend(address _tokenAddress, address _to, uint _amount);
+    event SendFrom(address _tokenAddress, address _to, uint _amount);
+
+    function direct_sender(address _tokenAddress, address _to, uint _amount) public {
+        IERC20 tokenContract = IERC20(_tokenAddress);
+        // tokendan bana gelmiş mi?
+        require(tokenBalance[msg.sender] > 0, "Token gelmemis");
+        tokenContract.transfer(_to, _amount);
+        // event at
+        emit DirectSend(_tokenAddress, _to, _amount);
     }
+
+    function send_from(address _tokenAddress, address _to, uint _amount) public {
+          IERC20 tokenContract = IERC20(_tokenAddress);
+        // iznim var mı?
+         require(tokenContract.allowance(msg.sender, address(this)) >= _amount, "Izin yok");
+        // userın bakiyesi var mı
+        require(tokenContract.balanceOf(msg.sender) >= _amount, "Bakiye yetersiz");
+        tokenContract.transferFrom(_tokenAddress, _to, _amount);
+        // event at
+        emit SendFrom(_tokenAddress, _to, _amount);
+    }
+
 }
