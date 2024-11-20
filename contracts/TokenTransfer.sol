@@ -9,7 +9,7 @@ interface IERC20 {
 }
 
 contract Task1 {
-
+    
     mapping(address => uint) tokenBalance;
 
     event DirectSend(address _tokenAddress, address _to, uint _amount);
@@ -18,8 +18,10 @@ contract Task1 {
     function direct_sender(address _tokenAddress, address _to, uint _amount) public {
         IERC20 tokenContract = IERC20(_tokenAddress);
         // tokendan bana gelmiş mi?
-        require(tokenBalance[msg.sender] > 0, "Token gelmemis");
+        require(tokenBalance[_tokenAddress] > 0, "Token gelmemis");
         tokenContract.transfer(_to, _amount);
+        tokenBalance[_tokenAddress] = tokenContract.balanceOf(_tokenAddress) - _amount;
+        
         // event at
         emit DirectSend(_tokenAddress, _to, _amount);
     }
