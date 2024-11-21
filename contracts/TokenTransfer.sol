@@ -9,7 +9,6 @@ interface IERC20 {
 }
 
 contract Task1 {
-    /mmm
     mapping(address => uint) tokenBalance;
 
     event DirectSend(address _tokenAddress, address _to, uint _amount);
